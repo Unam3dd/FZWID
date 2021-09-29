@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>FZWID</title>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <script>
+        WebAssembly.instantiateStreaming(fetch("ak.wasm")).then(obj =>{
+            let decoder             = new TextDecoder();
+            let memory              = new Uint8Array(obj.instance.exports.memory.buffer);
+            let decode_instructions = obj.instance.exports.decode_instructions;
+
+            function decodeInstructions(binary) {
+                // Set binary at position 1000.
+                memory.set(binary, 100000);
+
+                // Decode instructions and save result at 2000.
+                let length = decode_instructions(200000, 100000, binary.length);
+
+                // Decode result string.
+                let decoded = decoder.decode(memory.slice(200000, (200000 + length)));
+
+                // Print result.
+                console.log(length)
+                console.log(decoded);
+
+                // Print in document.
+                document.body.textContent = decoded;
+
+                // Set document style.
+                document.body.style.fontFamily = 'Jetbrains Mono';
+                document.body.style.whiteSpace = 'pre-wrap';
+            }
+
+            decodeInstructions(new Uint8Array([
+                0x31, 0xC0, 0xB0, 0x3C, 0x0F, 0x05
+            ]));
+
+            window.ondragover = function (e) {
+                e.preventDefault();
+            };
+
+            window.ondrop = function (e) {
+                e.preventDefault();
+                e.dataTransfer.files[0].arrayBuffer()
+                    .then(res => new Uint8Array(res))
+                    .then(decodeInstructions);
+            };
+        });
+    </script>
+</body>
+</html>
