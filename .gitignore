@@ -1,11 +1,14 @@
 # Ignore everything
 *
 
-# Expect
+# Expect sources
 !.gitignore
 !*.c
 !*.h
 !*.a
+
+# Expect test
+!test/**
 
 # Expect Makefile
 !Makefile
