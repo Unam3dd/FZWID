@@ -1,9 +1,10 @@
-#include "include/Zydis.h"
+#include <stddef.h>
+#include "Zydis/Zydis.h"
 
-int decode_instructions(const char *ptr, size_t length)
+int decode_instructions(const char *data, size_t length)
 {
     ZydisDecoder            decoder;
-    ZydiFormatter           formatter;
+    ZydisFormatter          formatter;
     ZydisDecodedInstruction instruction;
     ZyanU64                 runtime_address     = 0x0000;
     ZyanUSize               offset              = 0;
@@ -17,14 +18,15 @@ int decode_instructions(const char *ptr, size_t length)
     while (ZYAN_SUCCESS(ZydisDecoderDecodeBuffer(&decoder, (data + offset), (length - offset), &instruction))) {
         char buffer[256];
 
-        // Print current instruction pointer.
-        printf("%016" PRIX64 "  ", runtime_address);
-
-        // Format & print the binary instruction structure to human readable format
+        // Format the binary instruction structure to human readable format
         ZydisFormatterFormatInstruction(&formatter, &instruction, buffer, sizeof(buffer), runtime_address);
-        puts(buffer);
+
+        // printf("%016" PRIX64 "  ", runtime_address);
+        // puts(buffer);
 
         offset          += instruction.length;
         runtime_address += instruction.length;
     }
+
+    return (0);
 }

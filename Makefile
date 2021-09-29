@@ -9,7 +9,9 @@ NAME        =   fzwid
 
 CFLAGS      =   -Wall           \
                 -W              \
-                -I include
+                -I include      \
+                -L lib          \
+                -lZydis
 
 all:    $(NAME)
 
