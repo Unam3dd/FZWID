@@ -1,6 +1,8 @@
 #include <stddef.h>
+#include <emscripten.h>
 #include "Zydis/Zydis.h"
 
+EMSCRIPTEN_KEEPALIVE
 int decode_instructions(const char *data, size_t length)
 {
     ZydisDecoder            decoder;
