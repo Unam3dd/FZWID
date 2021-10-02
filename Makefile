@@ -5,18 +5,17 @@
 
 SRC         =   $(wildcard src/**.c)
 OBJ         =   $(SRC:.c=.o)
-NAME        =   fzwid
+NAME        =   test/fzwid.wasm
 
 CFLAGS      =   -Wall           \
                 -W              \
                 -I include      \
-                -L lib          \
-                -lZydis
+                -O3
 
 all:    $(NAME)
 
 $(NAME):$(OBJ)
-	$(CC) -o $(NAME) $(OBJ) $(CFLAGS)
+	$(CC) -lZydis -Llib --no-entry -o $(NAME) $(OBJ) $(CFLAGS)
 
 clean:
 	rm -f $(OBJ)

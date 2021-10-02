@@ -8,31 +8,32 @@
 </head>
 <body>
     <script>
-        WebAssembly.instantiateStreaming(fetch("ak.wasm")).then(obj =>{
-            let decoder             = new TextDecoder();
-            let memory              = new Uint8Array(obj.instance.exports.memory.buffer);
-            let decode_instructions = obj.instance.exports.decode_instructions;
+        WebAssembly.instantiateStreaming(fetch("fzwid.wasm")).then(obj =>{
+            let Module  = obj.instance.exports;
+            let memory  = new Uint8Array(obj.instance.exports.memory.buffer);
+            let decoder = new TextDecoder();
 
             function decodeInstructions(binary) {
-                // Set binary at position 1000.
-                memory.set(binary, 100000);
+                let stack       = Module.stackSave();
+                let input_pos   = Module.stackAlloc(binary.length);
+                let output_pos  = Module.stackAlloc(1 << 20);
 
-                // Decode instructions and save result at 2000.
-                let length = decode_instructions(200000, 100000, binary.length);
+                // Set binary at input pos.
+                memory.set(binary, input_pos);
+
+                // Decode instructions and set the result at output pos.
+                let length = Module.decode_instructions(output_pos, input_pos, binary.length);
 
                 // Decode result string.
-                let decoded = decoder.decode(memory.slice(200000, (200000 + length)));
+                let decoded = decoder.decode(memory.subarray(output_pos, (output_pos + length)));
 
-                // Print result.
-                console.log(length)
-                console.log(decoded);
+                // Set document style and print the result.
+                document.body.style.fontFamily  = 'Jetbrains Mono';
+                document.body.style.whiteSpace  = 'pre-wrap';
+                document.body.textContent       = decoded;
 
-                // Print in document.
-                document.body.textContent = decoded;
-
-                // Set document style.
-                document.body.style.fontFamily = 'Jetbrains Mono';
-                document.body.style.whiteSpace = 'pre-wrap';
+                // Restore stack.
+                Module.stackRestore(stack);
             }
 
             decodeInstructions(new Uint8Array([
