@@ -59,33 +59,29 @@ int check_format(unsigned char *magic)
 }
 
 EMSCRIPTEN_KEEPALIVE
-char *elf_get_section_x86(elf_parser_x86_t *elf_data, char *data, char *name, size_t *size)
+size_t elf_get_section_x86(elf_parser_x86_t *elf_data, char *data, char *name, char **addr)
 {
-    Elf32_Shdr *ptr = NULL;
-    *size = 0;
-
-    for (uint16_t i = 0; i < elf_data->elf_hdr->e_shnum; i++) {
-        if (strcmp(name, (char *)(elf_data->str_tab + elf_data->section_hdr[i].sh_name)) == 0) {
-            ptr = (Elf32_Shdr *)&elf_data->section_hdr[i];
-            *size = elf_data->section_hdr[i].sh_size;
-        }
-    }
-
-    return ((char*)(ptr) ? (data + ptr->sh_offset) : NULL);
-}
-
-EMSCRIPTEN_KEEPALIVE
-char *elf_get_section_x64(elf_parser_x64_t *elf_data, char *data, char *name, size_t *size)
-{
-    Elf64_Shdr *ptr = NULL;
-    *size = 0;
 
     for (uint16_t i = 0; i < elf_data->elf_hdr->e_shnum; i++) {
         if (strcmp(name, (elf_data->str_tab + elf_data->section_hdr[i].sh_name)) == 0) {
-            ptr = (Elf64_Shdr *)&elf_data->section_hdr[i];
-            *size = elf_data->section_hdr[i].sh_size;
+            *addr = (data + elf_data->section_hdr[i].sh_offset);
+            return (elf_data->section_hdr[i].sh_size);
         }
     }
 
-    return ((char*)(ptr) ? (data + ptr->sh_offset) : NULL);
+    return (-1);
+}
+
+EMSCRIPTEN_KEEPALIVE
+size_t elf_get_section_x64(elf_parser_x64_t *elf_data, char *data, char *name, char **addr)
+{
+
+    for (uint16_t i = 0; i < elf_data->elf_hdr->e_shnum; i++) {
+        if (strcmp(name, (elf_data->str_tab + elf_data->section_hdr[i].sh_name)) == 0) {
+            *addr = (data + elf_data->section_hdr[i].sh_offset);
+            return (elf_data->section_hdr[i].sh_size);
+        }
+    }
+
+    return (-1);
 }

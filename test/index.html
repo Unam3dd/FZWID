@@ -12,6 +12,7 @@
             let Module  = obj.instance.exports;
             let memory  = new Uint8Array(obj.instance.exports.memory.buffer);
             let decoder = new TextDecoder();
+            let encoder = new TextEncoder();
 
             function decodeInstructions(binary) {
                 let stack       = Module.stackSave();
@@ -36,6 +37,28 @@
                 Module.stackRestore(stack);
             }
 
+            function decodeSection(binary) {
+                let stack = Module.stackSave();
+                let struct_pos = Module.stackAlloc(512);
+                let input_pos = Module.stackAlloc(binary.length);
+                let addr_pos = Module.stackAlloc(4);
+                let section_name = Module.stackAlloc(0x100);
+
+                memory.set(binary, input_pos);
+                memory.set(encoder.encode(".text"), section_name);
+
+                Module.parse_elf_x64(struct_pos, input_pos);
+
+                let ak = Module.elf_get_section_x64(struct_pos, input_pos, section_name, addr_pos);
+                let offset = memory[addr_pos + 3] << 24 | memory[addr_pos + 2] << 16 | memory[addr_pos + 1] << 8 | memory[addr_pos];
+
+                console.log(offset);
+
+                decodeInstructions(memory.subarray(offset, (offset + ak)));
+
+                Module.stackRestore(stack);
+            }
+
             decodeInstructions(new Uint8Array([
                 0x31, 0xC0, 0xB0, 0x3C, 0x0F, 0x05
             ]));
@@ -48,7 +71,7 @@
                 e.preventDefault();
                 e.dataTransfer.files[0].arrayBuffer()
                     .then(res => new Uint8Array(res))
-                    .then(decodeInstructions);
+                    .then(decodeSection);
             };
         });
     </script>

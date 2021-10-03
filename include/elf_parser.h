@@ -40,5 +40,5 @@ struct elf_parser_x86_t
 int parse_elf_x64(elf_parser_x64_t *elf_data, char *data);
 int parse_elf_x86(elf_parser_x86_t *elf_data, char *data);
 int check_format(unsigned char *magic);
-char *elf_get_section_x86(elf_parser_x86_t *elf_data, char *data, char *name, size_t *size);
-char *elf_get_section_x64(elf_parser_x64_t *elf_data, char *data, char *name, size_t *size);
+size_t elf_get_section_x86(elf_parser_x86_t *elf_data, char *data, char *name, char **addr);
+size_t elf_get_section_x64(elf_parser_x64_t *elf_data, char *data, char *name, char **addr);
